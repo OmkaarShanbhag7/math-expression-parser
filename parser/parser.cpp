@@ -37,6 +37,26 @@ unique_ptr<TreeNode> parserFactor(){
 
 }
 
+unique_ptr<TreeNode> parserTerm(){
+  unique_ptr<TreeNode> root = parserFactor();
+
+  while(pos < tokens.size() && (tokens[pos].type == TokenType :: Multiply || tokens[pos].type == TokenType :: Divide )){
+    Token optokens = tokens[pos];
+    pos++;
+
+    unique_ptr<TreeNode> newRoot = make_unique<TreeNode>();
+
+    newRoot->data = optokens.value[0];
+
+    newRoot->left = move(root);
+    newRoot->right = parserFactor();
+
+    root = move(newRoot);
+  }
+  return root;
+}
+
+
 
 
 vector<Token> tokenize(string input){
