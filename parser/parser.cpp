@@ -1,0 +1,97 @@
+#include<bits/stdc++.h>
+using namespace std;
+
+enum class TokenType{
+  Number,
+  Plus,
+  Minus,
+  Multiply,
+  Divide,
+};
+
+struct Token {
+  TokenType type;
+  string value;
+};
+
+struct TreeNode {
+  char data;
+  unique_ptr<TreeNode> left;
+  unique_ptr<TreeNode> right;
+};
+
+int pos = 0;
+vector<Token>tokens;
+
+
+unique_ptr<TreeNode> parserFactor(){
+  Token current = tokens[pos];
+
+  unique_ptr<TreeNode> node = make_unique<TreeNode>();
+
+  node->data = current.value[0];
+
+  pos++;
+
+  return node;
+
+}
+
+
+
+vector<Token> tokenize(string input){
+  // vector<Token> tokens;
+
+  for(char c : input){
+    if(c == ' ') continue;
+    if(isdigit(c)){
+      Token t ;
+      t.type = TokenType :: Number;
+      t.value = string(1,c);
+
+      tokens.push_back(t);
+    }
+    if(c == '+'){
+      Token t;
+      t.type = TokenType::Plus;
+      t.value = string(1,c);
+
+      tokens.push_back(t);
+    }
+    if(c == '-'){
+      Token t;
+      t.type = TokenType::Minus;
+      t.value = string(1,c);
+
+      tokens.push_back(t);
+    }
+    if(c == '*'){
+      Token t;
+      t.type = TokenType::Multiply;
+      t.value = string(1,c);
+
+      tokens.push_back(t);
+    }
+    if(c == '/'){
+      Token t;
+      t.type = TokenType::Divide;
+      t.value = string(1,c);
+
+      tokens.push_back(t);
+    }
+  }
+  return tokens;
+}
+
+
+
+int main(){
+
+  tokenize("3 * 5 + 41 * 12");
+  
+  unique_ptr<TreeNode> treeRoot = parserFactor();
+
+  cout<<treeRoot->data<<endl;
+
+  return 0;
+}
