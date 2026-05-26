@@ -56,7 +56,23 @@ unique_ptr<TreeNode> parserTerm(){
   return root;
 }
 
+unique_ptr<TreeNode> parserExpressions(){
+  unique_ptr<TreeNode> root =  parserTerm();
+  while(pos < tokens.size() && (tokens[pos].type == TokenType::Plus || tokens[pos].type == TokenType::Minus )){
 
+    Token optokens = tokens[pos];
+    pos++;
+
+    unique_ptr<TreeNode> newRoot = make_unique<TreeNode>();
+
+    newRoot->data = optokens.value[0];
+    newRoot->left = move(root);
+    newRoot->right = parserTerm();
+
+    root = move(newRoot);
+  }
+  return root;
+}
 
 
 vector<Token> tokenize(string input){
@@ -109,9 +125,9 @@ int main(){
 
   tokenize("3 * 5 + 41 * 12");
   
-  unique_ptr<TreeNode> treeRoot = parserFactor();
+  unique_ptr<TreeNode> treeRoot = parserExpressions();
 
-  cout<<treeRoot->data<<endl;
+  
 
   return 0;
 }
