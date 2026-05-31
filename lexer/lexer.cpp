@@ -18,41 +18,53 @@ struct Token {
 vector<Token> tokenize(string input){
   vector<Token> tokens;
 
-  for(char c : input){
-    if(c == ' ') continue;
+  for(int i = 0 ; i < input.size() ;){
+    char c = input[i];
+    if(c == ' '){
+      i++;
+      continue;
+    }
     if(isdigit(c)){
+      string numStr = "";
+      while(i < input.size() && (isdigit(input[i]) || input[i] == '.')){
+        numStr += input[i];
+        i++;
+      }
       Token t ;
       t.type = TokenType :: Number;
-      t.value = string(1,c);
-
+      t.value = numStr;
       tokens.push_back(t);
+
+      continue;
     }
     if(c == '+'){
       Token t;
       t.type = TokenType::Plus;
-      t.value = string(1,c);
-
+      t.value = '+';
       tokens.push_back(t);
+      i++;
     }
     if(c == '-'){
       Token t;
       t.type = TokenType::Minus;
-      t.value = string(1,c);
-
+      t.value = '-';
+      i++;
       tokens.push_back(t);
+
     }
     if(c == '*'){
       Token t;
       t.type = TokenType::Multiply;
-      t.value = string(1,c);
-
+      t.value = '*';
+      i++;
       tokens.push_back(t);
+
     }
     if(c == '/'){
       Token t;
       t.type = TokenType::Divide;
-      t.value = string(1,c);
-
+      t.value = '/';
+      i++;
       tokens.push_back(t);
     }
   }
@@ -60,7 +72,7 @@ vector<Token> tokenize(string input){
 }
 
 int main() {
-    string expr = "2+3*5";
+    string expr = "42.5 + 300 * 5";
 
     vector<Token> tokens = tokenize(expr);
 
