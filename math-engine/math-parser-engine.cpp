@@ -1,13 +1,14 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-
 enum class TokenType{
   Number,
   Plus,
   Minus,
   Multiply,
   Divide,
+  OpenParen,
+  CloseParen,
 };
 
 struct Token {
@@ -24,11 +25,28 @@ struct TreeNode {
 int pos = 0;
 vector<Token>tokens;
 
+unique_ptr<TreeNode>parserExpressions();
 
 unique_ptr<TreeNode> parserFactor(){
   if(pos >= tokens.size()){
     throw runtime_error("Syntax Error : unexpected end of expressions");
   }
+
+  if(tokens[pos].type == TokenType::OpenParen){
+    pos++;
+
+    unique_ptr<TreeNode>root = parserExpressions();
+
+    if(pos >= tokens.size() || tokens[pos].type != TokenType::CloseParen){
+      throw runtime_error("Closing parenthesis Missing");
+    }
+
+    pos++;
+
+    return root;
+    
+  }
+
   if(tokens[pos].type != TokenType::Number){
     throw runtime_error("Syntax Error: Expected a number at position : " + to_string(pos));
   }
@@ -104,12 +122,9 @@ vector<Token> tokenize(string input){
         numStr += input[i];
         i++;
       }
-
-
       Token t ;
       t.type = TokenType :: Number;
       t.value = numStr;
-      i++;
       tokens.push_back(t);
     }
     else if(c == '+'){
@@ -137,6 +152,20 @@ vector<Token> tokenize(string input){
       Token t;
       t.type = TokenType::Divide;
       t.value = '/';
+      i++;
+      tokens.push_back(t);
+    }
+    else if(c == '('){
+      Token t;
+      t.type = TokenType :: OpenParen;
+      t.value = '(';
+      i++;
+      tokens.push_back(t);
+    }
+    else if(c == ')'){
+      Token t;
+      t.type = TokenType :: CloseParen;
+      t.value = ')';
       i++;
       tokens.push_back(t);
     }
@@ -172,10 +201,9 @@ double evaluate(TreeNode* node){
   return 0;
 }
 
-
 int main(){
   try{
-  tokenize("42.5 * 2 + 100.5 / 2");
+  tokenize("42.5 * 2 + 100.5 / 2 + ( 20 + 30.4 )");
   
   unique_ptr<TreeNode> treeRoot = parserExpressions();
 
@@ -184,6 +212,5 @@ int main(){
   } catch(const exception &e){
     cerr<<e.what()<<endl;
   } 
-
   return 0;
 }
