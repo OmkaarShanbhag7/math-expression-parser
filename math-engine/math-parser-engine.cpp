@@ -26,6 +26,12 @@ vector<Token>tokens;
 
 
 unique_ptr<TreeNode> parserFactor(){
+  if(pos >= tokens.size()){
+    throw runtime_error("Syntax Error : unexpected end of expressions");
+  }
+  if(tokens[pos].type != TokenType::Number){
+    throw runtime_error("Syntax Error: Expected a number at position : " + to_string(pos));
+  }
   Token current = tokens[pos];
 
   unique_ptr<TreeNode> node = make_unique<TreeNode>();
@@ -39,6 +45,9 @@ unique_ptr<TreeNode> parserFactor(){
 }
 
 unique_ptr<TreeNode> parserTerm(){
+  if(pos >= tokens.size()){
+    throw runtime_error("Syntax Error : unexpected end of expressions");
+  }
   unique_ptr<TreeNode> root = parserFactor();
 
   while(pos < tokens.size() && (tokens[pos].type == TokenType :: Multiply || tokens[pos].type == TokenType :: Divide )){
@@ -57,7 +66,10 @@ unique_ptr<TreeNode> parserTerm(){
   return root;
 }
 
-unique_ptr<TreeNode> parserExpressions(){
+unique_ptr<TreeNode> parserExpressions(){  
+  if(pos >= tokens.size()){
+    throw runtime_error("Syntax Error : unexpected end of expressions");
+  }
   unique_ptr<TreeNode> root =  parserTerm();
   while(pos < tokens.size() && (tokens[pos].type == TokenType::Plus || tokens[pos].type == TokenType::Minus )){
 
@@ -81,6 +93,7 @@ vector<Token> tokenize(string input){
 
   for(char c : input){
     if(c == ' ') continue;
+
     if(isdigit(c)){
       Token t ;
       t.type = TokenType :: Number;
@@ -88,33 +101,36 @@ vector<Token> tokenize(string input){
 
       tokens.push_back(t);
     }
-    if(c == '+'){
+    else if(c == '+'){
       Token t;
       t.type = TokenType::Plus;
       t.value = string(1,c);
 
       tokens.push_back(t);
     }
-    if(c == '-'){
+    else if(c == '-'){
       Token t;
       t.type = TokenType::Minus;
       t.value = string(1,c);
 
       tokens.push_back(t);
     }
-    if(c == '*'){
+    else if(c == '*'){
       Token t;
       t.type = TokenType::Multiply;
       t.value = string(1,c);
 
       tokens.push_back(t);
     }
-    if(c == '/'){
+    else if(c == '/'){
       Token t;
       t.type = TokenType::Divide;
       t.value = string(1,c);
 
       tokens.push_back(t);
+    }
+    else{
+      throw runtime_error("Lexical Error:Unknown Character: " + string(1,c));
     }
   }
   return tokens;
@@ -142,13 +158,15 @@ int evaluate(TreeNode* node){
 
 
 int main(){
-
-  tokenize("3 * 5 + 4 * 9 + 1 * 3 - 3 * 5 / 9");
+  try{
+  tokenize("3 * 5 + 4 * + 9 + 1 * 3 - 3 * 5 / 9");
   
   unique_ptr<TreeNode> treeRoot = parserExpressions();
 
   int finalAnswer = evaluate(treeRoot.get());
   cout<<"The math engine calculated : "<<finalAnswer<<endl;
-  
+  }catch(const exception &e){
+    cerr<<e.what()<<endl;
+  }  
   return 0;
 }
