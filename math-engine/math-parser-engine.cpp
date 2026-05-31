@@ -16,7 +16,7 @@ struct Token {
 };
 
 struct TreeNode {
-  char data;
+  string data;
   unique_ptr<TreeNode> left;
   unique_ptr<TreeNode> right;
 };
@@ -36,7 +36,7 @@ unique_ptr<TreeNode> parserFactor(){
 
   unique_ptr<TreeNode> node = make_unique<TreeNode>();
 
-  node->data = current.value[0];
+  node->data = current.value;
 
   pos++;
 
@@ -56,7 +56,7 @@ unique_ptr<TreeNode> parserTerm(){
 
     unique_ptr<TreeNode> newRoot = make_unique<TreeNode>();
 
-    newRoot->data = optokens.value[0];
+    newRoot->data = optokens.value;
 
     newRoot->left = move(root);
     newRoot->right = parserFactor();
@@ -78,7 +78,7 @@ unique_ptr<TreeNode> parserExpressions(){
 
     unique_ptr<TreeNode> newRoot = make_unique<TreeNode>();
 
-    newRoot->data = optokens.value[0];
+    newRoot->data = optokens.value;
     newRoot->left = move(root);
     newRoot->right = parserTerm();
 
@@ -91,42 +91,53 @@ unique_ptr<TreeNode> parserExpressions(){
 vector<Token> tokenize(string input){
   // vector<Token> tokens;
 
-  for(char c : input){
-    if(c == ' ') continue;
+  for(int i = 0 ; i < input.size();){
+    char c = input[i];
+    if(c == ' '){
+      i++;
+      continue;
+    }
 
     if(isdigit(c)){
+      string numStr = "";
+      while(i < input.size() && (isdigit(input[i]) || input[i] == '.')){
+        numStr += input[i];
+        i++;
+      }
+
+
       Token t ;
       t.type = TokenType :: Number;
-      t.value = string(1,c);
-
+      t.value = numStr;
+      i++;
       tokens.push_back(t);
     }
     else if(c == '+'){
       Token t;
       t.type = TokenType::Plus;
-      t.value = string(1,c);
-
+      t.value = '+';
+      i++;
       tokens.push_back(t);
     }
     else if(c == '-'){
       Token t;
       t.type = TokenType::Minus;
-      t.value = string(1,c);
-
+      t.value = '-';
+      i++;
       tokens.push_back(t);
     }
     else if(c == '*'){
       Token t;
       t.type = TokenType::Multiply;
-      t.value = string(1,c);
-
+      t.value = '*';
+      i++;
       tokens.push_back(t);
     }
     else if(c == '/'){
       Token t;
       t.type = TokenType::Divide;
-      t.value = string(1,c);
-
+      t.value = '/';
+      i++;
       tokens.push_back(t);
     }
     else{
@@ -136,22 +147,27 @@ vector<Token> tokenize(string input){
   return tokens;
 }
 
-int evaluate(TreeNode* node){
+double evaluate(TreeNode* node){
 
   if(node == nullptr) return 0;
 
-  if(node->data >= '0' && node->data <= '9'){
-    return node->data - '0';
+  if(isdigit(node->data[0])){
+    return stod(node->data);
   }
 
-  int leftVal = evaluate(node->left.get());
-  int rightVal = evaluate(node->right.get());
+  double leftVal = evaluate(node->left.get());
+  double rightVal = evaluate(node->right.get());
 
 
-  if(node->data == '+') return leftVal + rightVal;
-  if(node->data == '-') return leftVal - rightVal;
-  if(node->data == '*') return leftVal * rightVal;
-  if(node->data == '/') return leftVal / rightVal;
+  if(node->data == "+") return leftVal + rightVal;
+  if(node->data == "-") return leftVal - rightVal;
+  if(node->data == "*") return leftVal * rightVal;
+  if(node->data == "/"){
+    if(rightVal == 0){
+      throw runtime_error("Runtime error : Division by zero");
+    }
+    return leftVal / rightVal;
+  }
 
   return 0;
 }
@@ -159,14 +175,15 @@ int evaluate(TreeNode* node){
 
 int main(){
   try{
-  tokenize("3 * 5 + 4 * + 9 + 1 * 3 - 3 * 5 / 9");
+  tokenize("42.5 * 2 + 100.5 / 2");
   
   unique_ptr<TreeNode> treeRoot = parserExpressions();
 
-  int finalAnswer = evaluate(treeRoot.get());
+  double finalAnswer = evaluate(treeRoot.get());
   cout<<"The math engine calculated : "<<finalAnswer<<endl;
-  }catch(const exception &e){
+  } catch(const exception &e){
     cerr<<e.what()<<endl;
-  }  
+  } 
+
   return 0;
 }
