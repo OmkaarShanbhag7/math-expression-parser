@@ -8,6 +8,8 @@ enum class TokenType{
   Minus,
   Multiply,
   Divide,
+  openParen,
+  closeParen,
 };
 
 struct Token {
@@ -64,6 +66,20 @@ vector<Token> tokenize(string input){
       Token t;
       t.type = TokenType::Divide;
       t.value = '/';
+      i++;
+      tokens.push_back(t);
+    }
+    if(c == '('){
+      Token t;
+      t.type = TokenType :: openParen;
+      t.value = '(';
+      i++;
+      tokens.push_back(t);
+    }
+    if(c == ')'){
+      Token t;
+      t.type = TokenType :: closeParen;
+      t.value = ')';
       i++;
       tokens.push_back(t);
     }
