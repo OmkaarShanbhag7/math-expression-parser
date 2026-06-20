@@ -1,4 +1,6 @@
-#include<bits/stdc++.h>
+#include <bits/stdc++.h>
+#include <string>
+
 using namespace std;
 
 enum class TokenType{
@@ -10,6 +12,7 @@ enum class TokenType{
 	OpenParen,
 	CloseParen,
 	Exponential,
+	Identifier
 };
 
 struct Token {
@@ -198,6 +201,17 @@ vector<Token> tokenize(string input){
 			i++;
 			tokens.push_back(t);
 		}
+		else if(isalpha(c)){
+			string idStr = "";
+			while(i < input.size() && isalpha(input[i])){
+				i++;
+				idStr += input[i];
+			}
+			Token t;
+			t.value = idStr;
+			t.type = TokenType :: Identifier;
+			tokens.push_back(t);
+		}
 		else{
 			throw runtime_error("Lexical Error:Unknown Character: " + string(1,c));
 		}
@@ -232,15 +246,36 @@ double evaluate(TreeNode* node){
 }
 
 int main(){
-	try{
-		tokenize("42.5 * 2 + 100.5 / 2 + ( 20 + 30.4 )^2 + 23");
+	cout << "==================================================" << endl;
+	cout << "       Custom Math Engine Terminal REPL          " << endl;
+	cout << "       Type your math or 'exit' to close.         " << endl;
+	cout << "==================================================" << endl << endl;
+	
+	string inputline;
+	while(true){
+		cout<<"Engine"<<endl;
+		getline(cin,inputline);
 
-		unique_ptr<TreeNode> treeRoot = parserExpressions();
+		if(inputline == "quit" || inputline == "exit"){
+			cout<<"Engine offline. Goodbye!"<<endl;
+			break;
+		}
 
-		double finalAnswer = evaluate(treeRoot.get());
-		cout<<"The math engine calculated : "<<finalAnswer<<endl;
-	} catch(const exception &e){
-		cerr<<e.what()<<endl;
-	} 
+		if(inputline.empty())continue;
+
+		pos = 0;
+		tokens.clear();
+
+		try{
+			tokenize(inputline);
+
+			unique_ptr<TreeNode> treeRoot = parserExpressions();
+
+			double finalAnswer = evaluate(treeRoot.get());
+			cout<<"The math engine calculated : "<<finalAnswer<<endl;
+		} catch(const exception &e){
+			cerr<<e.what()<<endl;
+		} 
+	}
 	return 0;
 }
