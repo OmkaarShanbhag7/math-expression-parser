@@ -36,6 +36,32 @@ unique_ptr<TreeNode> parserFactor(){
 	if(pos >= tokens.size()){
 		throw runtime_error("Syntax Error : unexpected end of expressions");
 	}
+	
+	if(tokens[pos].type == TokenType::Identifier){
+		string funcName = tokens[pos].value;
+		pos++;
+
+		if(pos >= tokens.size() || tokens[pos].type != TokenType::OpenParen){
+			throw runtime_error("Syntax Error: Expected '(' after function name: " + funcName);
+		}
+		pos++;
+		
+		unique_ptr<TreeNode> innerExpr = parserExpressions();
+
+		if(pos >= tokens.size() || tokens[pos].type != TokenType::CloseParen){
+			throw runtime_error("Syntax Error: Missing closing Parenthesis for function: " + funcName);
+		}
+		pos++;
+
+		unique_ptr<TreeNode> funcNode = make_unique<TreeNode>();
+		funcNode->data = funcName;
+		funcNode->left = move(innerExpr);
+
+		return funcNode;
+	}
+
+
+
 
 	if(tokens[pos].type == TokenType::OpenParen){
 		pos++;
