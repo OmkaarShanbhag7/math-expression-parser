@@ -36,7 +36,7 @@ unique_ptr<TreeNode> parserFactor(){
 	if(pos >= tokens.size()){
 		throw runtime_error("Syntax Error : unexpected end of expressions");
 	}
-	
+
 	if(tokens[pos].type == TokenType::Identifier){
 		string funcName = tokens[pos].value;
 		pos++;
@@ -59,10 +59,7 @@ unique_ptr<TreeNode> parserFactor(){
 
 		return funcNode;
 	}
-
-
-
-
+	
 	if(tokens[pos].type == TokenType::OpenParen){
 		pos++;
 
@@ -77,15 +74,25 @@ unique_ptr<TreeNode> parserFactor(){
 		return root;
 
 	}
-
-	if(tokens[pos].type != TokenType::Number){
+	
+	bool isNegative = false;
+	if(pos < tokens.size() && tokens[pos].type == TokenType :: Minus){
+		isNegative = true;
+		pos++;
+	}
+	if(pos >= tokens.size() || tokens[pos].type != TokenType::Number){
 		throw runtime_error("Syntax Error: Expected a number at position : " + to_string(pos));
 	}
 	Token current = tokens[pos];
 
 	unique_ptr<TreeNode> node = make_unique<TreeNode>();
 
-	node->data = current.value;
+	if(isNegative){
+		node->data = '-' + current.value;
+	}
+	else{
+		node->data = current.value;
+	}
 
 	pos++;
 
@@ -210,14 +217,14 @@ vector<Token> tokenize(string input){
 			Token t;
 			t.type = TokenType :: OpenParen;
 			t.value = "(";
-			i++;
+			if(c == '(') i++; else i += 3;
 			tokens.push_back(t);
 		}
 		else if(c == ')'){
 			Token t;
 			t.type = TokenType :: CloseParen;
 			t.value = ")";
-			i++;
+			if(c == ')') i++; else i+=3;
 			tokens.push_back(t);
 		}
 		else if(c == '^'){
@@ -229,9 +236,9 @@ vector<Token> tokenize(string input){
 		}
 		else if(isalpha(c)){
 			string idStr = "";
-			while(i < input.size() && isalpha(input[i])){
-				i++;
+			while(i < input.size() && isalnum(input[i])){
 				idStr += input[i];
+				i++;
 			}
 			Token t;
 			t.value = idStr;
@@ -249,8 +256,45 @@ double evaluate(TreeNode* node){
 
 	if(node == nullptr) return 0;
 
-	if(isdigit(node->data[0])){
+	if(isdigit(node->data[0])|| node->data.size() > 1 && node->data[0] == '-' && isdigit(node->data[1])){
 		return stod(node->data);
+	}
+	
+	if(node->data == "sqrt"){
+		double val = evaluate(node->left.get());
+		if(val < 0) throw runtime_error("Runtime Math Error: Square root of a negative number");
+		return sqrt(val);
+	}
+	if(node->data == "cuberoot") {
+		return cbrt(evaluate(node->left.get()));
+	}
+	if(node->data == "sin") {
+		return sin(evaluate(node->left.get())); 
+	}
+	if(node->data == "cos") {
+		return cos(evaluate(node->left.get()));  
+	}
+	if(node->data == "log"){
+		double val = evaluate(node->left.get());
+		if(val <= 0) throw runtime_error("Runtime Math Error: Logarithm of non positive Number");
+		return log(val);
+	}
+	if(node->data == "tan") {
+		return tan(evaluate(node->left.get()));
+	}
+	if(node->data == "log10") {
+		double val = evaluate(node->left.get());
+		if(val <= 0) throw runtime_error("Runtime Math Error: Log10 of non-positive number!");
+		return log10(val);
+	}
+	if(node->data == "abs") {
+		return abs(evaluate(node->left.get()));
+	}
+	if(node->data == "ceil") {
+		return ceil(evaluate(node->left.get()));
+	}
+	if(node->data == "floor") {
+		return floor(evaluate(node->left.get()));
 	}
 
 	double leftVal = evaluate(node->left.get());
@@ -272,11 +316,15 @@ double evaluate(TreeNode* node){
 }
 
 int main(){
+
 	cout << "==================================================" << endl;
-	cout << "       Custom Math Engine Terminal REPL          " << endl;
-	cout << "       Type your math or 'exit' to close.         " << endl;
+	cout << "  Industrial Scientific AST Math Shell Emulator   " << endl;
+	cout << "  Supported: +, -, *, /, ^, (), sqrt, cuberoot,   " << endl;
+	cout << "             sin, cos, tan, log, log10, abs,      " << endl;
+	cout << "             ceil, floor                          " << endl;
+	cout << "  Type your expression or 'exit' to close.        " << endl;
 	cout << "==================================================" << endl << endl;
-	
+
 	string inputline;
 	while(true){
 		cout<<"Engine"<<endl;
