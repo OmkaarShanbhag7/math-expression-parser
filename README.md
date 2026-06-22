@@ -1,64 +1,42 @@
-# Mathematical Expression Engine (C++)
+[ Raw User Input String ] ──► [ Lexical Scanner (Lexer) ] ──► [ Token Vector ]│[ Final Value Output ] ◄── [ AST Evaluator (Backend) ] ◄── [ Recursive Parser ]
+### Precedence Hierarchy (From Highest to Lowest)
 
-A high-performance, modular mathematical expression evaluation engine built from scratch in Modern C++. This system avoids high-level abstractions and external parsing libraries, focusing instead on formal language theory, compiler design principles, and strict memory efficiency.
-
-## 🚀 Architectural Overview
-
-The engine processes mathematical inputs through a structured compilation pipeline:
-1. **Lexical Analysis (Tokenizer):** Converts raw string expressions into a deterministic stream of strongly-typed tokens.
-2. **Syntactic Analysis (Parser):** Implements a formal **Context-Free Grammar (CFG)** using a top-down, predictive **Recursive-Descent Parser**.
-3. **Abstract Syntax Tree (AST):** Builds a hierarchical binary tree representing operator precedence and execution flow.
-4. **Runtime Evaluation:** Traverses the AST recursively to compute floating-point evaluations safely.
+1.  **Factors:** Positive/Negative Numbers, Grouped Parentheses `( Expression )`, or Scientific Function Calls `function( Expression )`.
+2.  **Exponents:** Right-Associative Power Operator `^` (evaluated right-to-left via recursive branching).
+3.  **Terms:** Left-Associative Multiplication `*` and Division `/`.
+4.  **Expressions:** Left-Associative Addition `+` and Subtraction `-`.
 
 ---
 
-## 📐 Grammar Specification (CFG)
+## 🌳 Abstract Syntax Tree Representation
 
-To cleanly handle operator precedence (BODMAS/PEMDAS) and arbitrary nested parentheses without state conflicts, the parser strictly enforces the following Context-Free Grammar:
+Instead of relying on unstable string replacement or basic stack evaluations, this engine converts math expressions into deep tree matrices. For example, the expression:
+```text
+3 * 2 ^ 3 + 5
+Is systematically parsed into the following binary tree structure:Plaintext        
+         [ + ]
+        /     \\
+     [ * ]    5.0
+    /     \\
+  3.0    [ ^ ]
+        /     \\
+      2.0     3.0
+The evaluator traverses the tree bottom-up, naturally resolving the exponent first ($2^3 = 8$), the multiplication second ($3 \times 8 = 24$), and the addition last ($24 + 5 = 29$).🛠️ Compilation & ExecutionThis project is written in standard C++ and requires no external third-party dependencies.PrerequisitesA C++ compiler supporting standard compilation flags (e.g., GCC/G++, Clang, or MSVC).StepsSave the code into a file named main.cpp.Compile using your preferred terminal tool:Bashg++ -O3 main.cpp -o math_shell
+Launch the interactive executable:Bash./math_shell
+🕹️ Interactive Session ExamplesComplex Precedence VerificationPlaintextEngine >> 2 * 3 ^ 2 + ( 20 + 30.4 )
+The math engine calculated : 68.4
+Exponent Right-Associativity VerificationPlaintextEngine >> 2 ^ 3 ^ 2
+The math engine calculated : 512
+Stress Test & Mathematical Boundary IsolationPlaintextEngine >> abs( -5 ) * sqrt( 16 ) + floor( 4.9 ) ^ ceil( 1.1 ) / log10( 100 ) - ( tan( 0 ) + cos( 0 ) * cuberoot( 8 ) ) + log( 2.7182818 )
+The math engine calculated : 27
+Exception Safety in ActionPlaintextEngine >> 100 / ( 5 - 5 )
+Error: Runtime error : Division by zero
 
-$$
-\begin{aligned}
-\text{Expression} &\rightarrow \text{Term} \ ((\text{`+`} \mid \text{`-`}) \ \text{Term})^* \\
-\text{Term}       &\rightarrow \text{Power} \ ((\text{`*`} \mid \text{`/`}) \ \text{Power})^* \\
-\text{Power}      &\rightarrow \text{Factor} \ (\text{`^`} \ \text{Factor})^* \\
-\text{Factor}     &\rightarrow \text{LiteralNumber} \mid \text{`(`} \ \text{Expression} \ \text{`)`}
-\end{aligned}
-$$
+Engine >> sqrt( -16 )
+Error: Runtime Math Error: Square root of a negative number
 
-Each non-terminal production rule maps directly to a mutually recursive C++ function (`parse_expression()`, `parse_term()`, etc.), allowing operator binding strengths to be resolved naturally by the call stack.
+Engine >> log10( 0 )
+Error: Runtime Math Error: Log10 of non-positive number!
 
----
-
-## ✨ Features Implemented
-
-* **Mathematical Rigor:** Full support for multi-digit floating-point arithmetic, explicit parenthesized sub-expressions, and right-associative exponentiation (`^`).
-* **Modern C++ Memory Safety:** The AST lifecycle is built completely around RAII principles. Nodes are owned and managed via **`std::unique_ptr`**, ensuring zero memory leaks and deterministic resource cleanup.
-* **Granular Error Detection:** Robust exception architecture that catches and reports:
-  * *Lexical Errors:* Invalid or unrecognized characters.
-  * *Syntax Errors:* Mismatched parentheses or malformed expressions (e.g., `5 + * 3`).
-  * *Runtime Exceptions:* Structural evaluation issues.
-
----
-
-## 🔮 Future Roadmap
-
-The engine is actively evolving into a programmable Domain-Specific Language (DSL) infrastructure. Future development phases include:
-
-- [x] **Phase 1:** Core Lexer, Recursive-Descent Parser, and AST Engine.
-- [x] **Phase 2:** Floating-point numbers, Exponentiation, and Grammar Validation.
-- [ ] **Phase 3:** **Variable State Management** — Introducing a dynamic Symbol Table to parse and store states like `x = 10` and `y = x + 5`.
-- [ ] **Phase 4:** **Unary Operators & Functions** — Implementing prefix signs (`-5`) and built-in math invocations (`sqrt(x)`, `max(a, b)`).
-- [ ] **Phase 5:** **Interactive REPL** — Creating a terminal-based Read-Eval-Print Loop featuring automated error recovery to prevent syntax anomalies from crashing the environment.
-
----
-
-## 🛠️ Building & Running
-
-To compile the engine using a modern C++ compiler (C++17 or later required):
-
-```bash
-# Compile using GCC
-g++ -std=c++17 -O3 main.cpp -o expression_engine
-
-# Run the binary
-./expression_engine
+Engine >> 5 * + 2
+Error: Syntax Error: Expected a number or function at position : 
