@@ -1,42 +1,28 @@
-[ Raw User Input String ] ──► [ Lexical Scanner (Lexer) ] ──► [ Token Vector ]│[ Final Value Output ] ◄── [ AST Evaluator (Backend) ] ◄── [ Recursive Parser ]
-### Precedence Hierarchy (From Highest to Lowest)
+# Scientific AST Math Shell Emulator
 
-1.  **Factors:** Positive/Negative Numbers, Grouped Parentheses `( Expression )`, or Scientific Function Calls `function( Expression )`.
-2.  **Exponents:** Right-Associative Power Operator `^` (evaluated right-to-left via recursive branching).
-3.  **Terms:** Left-Associative Multiplication `*` and Division `/`.
-4.  **Expressions:** Left-Associative Addition `+` and Subtraction `-`.
+An industrial-grade, high-performance command-line scientific interpreter built from scratch in C++. This project demonstrates advanced concepts in language theory and compiler design, utilizing a custom **Lookahead Lexical Scanner**, a **Recursive Descent Operator Precedence Parser**, and a memory-safe **Abstract Syntax Tree (AST)** execution engine to evaluate complex mathematical and scientific expressions in real-time.
 
 ---
 
-## 🌳 Abstract Syntax Tree Representation
+## 🚀 Key Features
 
-Instead of relying on unstable string replacement or basic stack evaluations, this engine converts math expressions into deep tree matrices. For example, the expression:
-```text
-3 * 2 ^ 3 + 5
-Is systematically parsed into the following binary tree structure:Plaintext        
-         [ + ]
-        /     \\
-     [ * ]    5.0
-    /     \\
-  3.0    [ ^ ]
-        /     \\
-      2.0     3.0
-The evaluator traverses the tree bottom-up, naturally resolving the exponent first ($2^3 = 8$), the multiplication second ($3 \times 8 = 24$), and the addition last ($24 + 5 = 29$).🛠️ Compilation & ExecutionThis project is written in standard C++ and requires no external third-party dependencies.PrerequisitesA C++ compiler supporting standard compilation flags (e.g., GCC/G++, Clang, or MSVC).StepsSave the code into a file named main.cpp.Compile using your preferred terminal tool:Bashg++ -O3 main.cpp -o math_shell
-Launch the interactive executable:Bash./math_shell
-🕹️ Interactive Session ExamplesComplex Precedence VerificationPlaintextEngine >> 2 * 3 ^ 2 + ( 20 + 30.4 )
-The math engine calculated : 68.4
-Exponent Right-Associativity VerificationPlaintextEngine >> 2 ^ 3 ^ 2
-The math engine calculated : 512
-Stress Test & Mathematical Boundary IsolationPlaintextEngine >> abs( -5 ) * sqrt( 16 ) + floor( 4.9 ) ^ ceil( 1.1 ) / log10( 100 ) - ( tan( 0 ) + cos( 0 ) * cuberoot( 8 ) ) + log( 2.7182818 )
-The math engine calculated : 27
-Exception Safety in ActionPlaintextEngine >> 100 / ( 5 - 5 )
-Error: Runtime error : Division by zero
+* **Interactive REPL Shell:** A stateful, continuous command-line interface with a lifecycle management loop that completely isolates calculation environments between inputs.
+* **Custom Tokenizer (Lexer):** An alphanumeric lookahead scanner that dynamically packages strings into structured multi-digit floats, negative numbers (unary operators), mathematical operations, and identifier strings without token-shattering anomalies.
+* **Advanced Grammar & Operator Precedence:** Implements 4 distinct tiers of mathematical priority cleanly mapped onto an AST, fully handling standard operations (`+`, `-`, `*`, `/`), nested parentheses grouping `()`, and right-associative exponentiation (`^`) through recursive right-branching.
+* **Scientific Function Suite:** Native back-end execution bindings linked directly to the standard library (`<cmath>`) supporting `sqrt`, `cuberoot`, `sin`, `cos`, `tan`, `log` (natural), `log10`, `abs`, `ceil`, and `floor`.
+* **Robust Exception Safety Rails:** Utilizes comprehensive exception boundaries to catch syntax mismatches, lexical anomalies, and runtime mathematical execution failures (such as division by zero or logarithmic domain errors) without crashing the runtime shell.
 
-Engine >> sqrt( -16 )
-Error: Runtime Math Error: Square root of a negative number
+---
 
-Engine >> log10( 0 )
-Error: Runtime Math Error: Log10 of non-positive number!
+## 📐 Architecture & Grammar Blueprint
 
-Engine >> 5 * + 2
-Error: Syntax Error: Expected a number or function at position : 
+The interpreter follows a classic multi-phase compilation pipeline to translate and execute expressions:
+
+[ Raw User Input String ] ──► [ Lexical Scanner (Lexer) ] ──► [ Token Vector ]│[ Final Value Output ] ◄── [ AST Evaluator (Backend) ] ◄── [ Recursive Parser ]
+### Precedence Hierarchy (From Highest to Lowest)
+
+1. **Factors:** Positive/Negative Numbers, Grouped Parentheses `( Expression )`, or Scientific Function Calls `function( Expression )`.
+2. **Exponents:** Right-Associative Power Operator `^` (evaluated right-to-left via recursive branching).
+3. **Terms:** Left-Associative Multiplication `*` and Division `/`.
+4. **Expressions:** Left-Associative Addition `+` and Subtraction `-`.
+
